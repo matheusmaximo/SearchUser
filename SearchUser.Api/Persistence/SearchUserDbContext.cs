@@ -17,12 +17,6 @@ namespace SearchUser.Api.Persistence
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-
-            base.OnModelCreating(modelBuilder);
-        }
-
         /// <summary>
         /// Fill fields CreateOn and LastUpdateOn
         /// </summary>

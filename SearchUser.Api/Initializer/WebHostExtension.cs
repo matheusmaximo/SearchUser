@@ -8,8 +8,16 @@ using System.Threading.Tasks;
 
 namespace SearchUser.Api
 {
-    public static class DatabaseSeedInitializer
+    /// <summary>
+    /// WebHost extension
+    /// </summary>
+    public static class WebHostExtension
     {
+        /// <summary>
+        /// Provide database seed to test environment
+        /// </summary>
+        /// <param name="host">WebHost</param>
+        /// <returns>WebHost</returns>
         public static IWebHost Seed(this IWebHost host)
         {
             using (var serviceScope = host.Services.CreateScope())

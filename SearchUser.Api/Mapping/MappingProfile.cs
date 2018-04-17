@@ -19,6 +19,8 @@ namespace SearchUser.Api.Mapping
                 .ForMember(e => e.Password, e => e.Ignore())
                 .ReverseMap()
                 .ForMember(e => e.UserName, e => e.MapFrom(c => c.Email));
+
+            CreateMap<ApplicationUser, SignedInUserViewModel>();
         }
     }
 }

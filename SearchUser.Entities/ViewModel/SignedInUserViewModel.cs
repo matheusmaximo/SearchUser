@@ -1,21 +1,14 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 
 namespace SearchUser.Entities.ViewModel
 {
-    public class UserViewModel
+    public class SignedInUserViewModel
     {
         public string Id { get; set; }
-
-        public string Name { get; set; }
-
-        public string Email { get; set; }
-
-        public string Password { get; set; }
-
-        public ICollection<TelephoneViewModel> Telephones { get; set; }
 
         public DateTime? CreatedOn { get; set; }
 
@@ -24,10 +17,5 @@ namespace SearchUser.Entities.ViewModel
         public DateTime? LastLoginOn { get; set; }
 
         public string Token { get; set; }
-
-        public UserViewModel()
-        {
-            this.Telephones = new Collection<TelephoneViewModel>();
-        }
     }
 }

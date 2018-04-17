@@ -10,7 +10,7 @@ namespace SearchUser.Entities.Models
     /// <summary>
     /// Application user class
     /// </summary>
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser, IBaseEntity
     {
         [Required]
         [StringLength(255)]
@@ -27,12 +27,12 @@ namespace SearchUser.Entities.Models
 
         #region Control properties
         /// <summary>
-        /// User creation date
+        /// Entity creation date
         /// </summary>
         public DateTime? CreatedOn { get; set; }
 
         /// <summary>
-        /// User last update date
+        /// Entity last update date
         /// </summary>
         public DateTime? LastUpdatedOn { get; set; }
 

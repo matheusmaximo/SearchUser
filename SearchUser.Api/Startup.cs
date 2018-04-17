@@ -1,26 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using SearchUser.Api.Persistence;
 using SearchUser.Entities.Models;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace SearchUser.Api
 {
+    /// <summary>
+    /// Startup class
+    /// </summary>
     public class Startup
     {
         public IConfiguration Configuration { get; }
@@ -45,42 +38,28 @@ namespace SearchUser.Api
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<SearchUserDbContext>()
                 .AddDefaultTokenProviders();
+
             services.Configure<IdentityOptions>(options =>
             {
-                // User settings
+                // Make sure email user is unique
                 options.User.RequireUniqueEmail = true;
             });
 
-            // Jwt Authentication settings
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-            services
-                .AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            // Custom method to add security settings
+            services.AddApplicationSecurity(Configuration);
 
-                })
-                .AddJwtBearer(cfg =>
-                {
-                    cfg.RequireHttpsMetadata = false;
-                    cfg.SaveToken = true;
-                    cfg.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidIssuer = Configuration["Jwt:Issuer"],
-                        ValidAudience = Configuration["Jwt:Issuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"])),
-                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
-                    };
-                });
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
+            // Use Authentication
+            app.UseAuthentication();
+
             // DotNetCore settings
             app.UseMvc();
-            
+
             // Swagger settings
             app.UseSwagger(c => c.RouteTemplate = "documentation/{documentName}/swagger.json");
             app.UseSwaggerUI(options =>
