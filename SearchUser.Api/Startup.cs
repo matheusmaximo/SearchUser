@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SearchUser.Api.Manager;
 using SearchUser.Api.Persistence;
 using SearchUser.Entities.Models;
 using Swashbuckle.AspNetCore.Swagger;
@@ -19,7 +20,9 @@ namespace SearchUser.Api
         public IConfiguration Configuration { get; }
 
         #region Startup default methods
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
         public void ConfigureServices(IServiceCollection services)
         {
             // DbContext comes from Configure{Environment}Services method
@@ -37,6 +40,7 @@ namespace SearchUser.Api
             // Identity settings
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<SearchUserDbContext>()
+                .AddSignInManager<ApplicationSignInManager>()
                 .AddDefaultTokenProviders();
 
             services.Configure<IdentityOptions>(options =>
@@ -51,14 +55,13 @@ namespace SearchUser.Api
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
         public void Configure(IApplicationBuilder app)
         {
             // Use Authentication
             app.UseAuthentication();
-
-            // DotNetCore settings
-            app.UseMvc();
 
             // Swagger settings
             app.UseSwagger(c => c.RouteTemplate = "documentation/{documentName}/swagger.json");
@@ -66,6 +69,14 @@ namespace SearchUser.Api
             {
                 options.RoutePrefix = "documentation";
                 options.SwaggerEndpoint("/documentation/v1/swagger.json", "Search User API v1");
+            });
+
+            // DotNetCore settings
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                    name: "default",
+                    template: "api/{action}/{id?}");
             });
         }
         #endregion
@@ -85,7 +96,9 @@ namespace SearchUser.Api
             this.ConfigureServices(services);
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
         public void ConfigureDevelopment(IApplicationBuilder app)
         {
             app.UseDeveloperExceptionPage();
