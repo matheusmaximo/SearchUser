@@ -58,7 +58,7 @@ namespace SearchUser.Api
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, SearchUserDbContext dbContext)
         {
             // Use Authentication
             app.UseAuthentication();
@@ -78,6 +78,9 @@ namespace SearchUser.Api
                     name: "default",
                     template: "api/{action}/{id?}");
             });
+
+            // Ensure tables are created
+            dbContext.Database.EnsureCreated();
         }
         #endregion
 
@@ -99,10 +102,10 @@ namespace SearchUser.Api
         /// <summary>
         /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         /// </summary>
-        public void ConfigureDevelopment(IApplicationBuilder app)
+        public void ConfigureDevelopment(IApplicationBuilder app, SearchUserDbContext dbContext)
         {
             app.UseDeveloperExceptionPage();
-            this.Configure(app);
+            this.Configure(app, dbContext);
         }
         #endregion
 

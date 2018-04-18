@@ -44,7 +44,7 @@ namespace SearchUser.Api.Controllers
             if (user == null) { return NotFound(); }
 
             // Verify last login time
-            if(!user.LastLoginOn.HasValue || (user.LastLoginOn.Value.AddMinutes(Convert.ToDouble(1)).Ticks < DateTime.Now.Ticks))
+            if(!signInManager.SessionIsValid(user))
             {
                 return StatusCode(StatusCodes.Status401Unauthorized, new { Message = "Invalid Session" });
             }
