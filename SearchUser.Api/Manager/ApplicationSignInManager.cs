@@ -23,16 +23,7 @@ namespace SearchUser.Api.Manager
         private readonly IHttpContextAccessor contextAccessor;
         private readonly IConfiguration configuration;
 
-        /// <summary>
-        /// Custom ApplicationSignInManager constructor
-        /// </summary>
-        public ApplicationSignInManager(UserManager<ApplicationUser> userManager, IHttpContextAccessor contextAccessor, IUserClaimsPrincipalFactory<ApplicationUser> claimsFactory, IOptions<IdentityOptions> optionsAccessor, ILogger<SignInManager<ApplicationUser>> logger, IAuthenticationSchemeProvider schemes, IConfiguration configuration)
-            : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes)
-        {
-            this.contextAccessor = contextAccessor;
-            this.configuration = configuration;
-        }
-
+        #region Public methods
         /// <summary>
         /// Get user Id from current Jwt token logged user
         /// </summary>
@@ -51,7 +42,9 @@ namespace SearchUser.Api.Manager
         {
             return (user.LastLoginOn.HasValue && (user.LastLoginOn.Value.AddMinutes(Convert.ToDouble(configuration["Jwt:ExpireMinutes"])).Ticks > DateTime.Now.Ticks));
         }
+        #endregion
 
+        #region Overrides
         /// <summary>
         /// Extension method for Identity Core SignInManager SignInAsync method
         /// </summary>
@@ -66,7 +59,21 @@ namespace SearchUser.Api.Manager
             // Request token
             user.Token = GenerateJwtToken(user.Email, user);
         }
+        #endregion
 
+        #region Constructor
+        /// <summary>
+        /// Custom ApplicationSignInManager constructor
+        /// </summary>
+        public ApplicationSignInManager(UserManager<ApplicationUser> userManager, IHttpContextAccessor contextAccessor, IUserClaimsPrincipalFactory<ApplicationUser> claimsFactory, IOptions<IdentityOptions> optionsAccessor, ILogger<SignInManager<ApplicationUser>> logger, IAuthenticationSchemeProvider schemes, IConfiguration configuration)
+            : base(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes)
+        {
+            this.contextAccessor = contextAccessor;
+            this.configuration = configuration;
+        }
+        #endregion
+
+        #region Private methods
         /// <summary>
         /// Creates a Jwt Token
         /// </summary>
@@ -97,5 +104,6 @@ namespace SearchUser.Api.Manager
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        #endregion
     }
 }

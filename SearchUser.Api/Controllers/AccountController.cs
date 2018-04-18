@@ -46,7 +46,7 @@ namespace SearchUser.Api.Controllers
             }
 
             // Return found user
-            return new ObjectResult(mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
+            return StatusCode(StatusCodes.Status200OK, mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace SearchUser.Api.Controllers
             if (user == null) { return NotFound(new { Message = "Invalid user and / or password" }); }
             
             // Check given password
-            var result = await signInManager.PasswordSignInAsync(user.Email, loginDto.Password, false, false);
+            var result = await signInManager.PasswordSignInAsync(user.Email ?? string.Empty, loginDto.Password ?? string.Empty, false, false);
 
             // If not succeed, report error
             if (!result.Succeeded)
@@ -76,7 +76,7 @@ namespace SearchUser.Api.Controllers
             await signInManager.SignInAsync(user, false);
 
             // Return JSON object
-            return new ObjectResult(mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
+            return StatusCode(StatusCodes.Status202Accepted, mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
         }
 
         /// <summary>
@@ -96,17 +96,17 @@ namespace SearchUser.Api.Controllers
             var result = await signInManager.UserManager.CreateAsync(user, userDto.Password);
 
             // Check if suceed
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                // Request sign in
-                await signInManager.SignInAsync(user, false);
-
-                // Return mapped object
-                return new ObjectResult(mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
+                // Report errors
+                return StatusCode(StatusCodes.Status400BadRequest, result.Errors.ToArray());
             }
 
-            // Report errors
-            return StatusCode(StatusCodes.Status400BadRequest, result.Errors.ToArray());
+            // Request sign in
+            await signInManager.SignInAsync(user, false);
+
+            // Return mapped object
+            return StatusCode(StatusCodes.Status201Created, mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
         }
         #endregion
 

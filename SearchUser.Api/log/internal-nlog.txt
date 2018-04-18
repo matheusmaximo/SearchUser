@@ -169,3 +169,63 @@
 2018-04-18 16:52:03.1911 Info Adding target File Target[ownFile-web]
 2018-04-18 16:52:03.2003 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
 2018-04-18 16:52:03.2184 Info Found 45 configuration items
+2018-04-18 17:32:03.3308 Info Message Template Auto Format enabled
+2018-04-18 17:32:03.3516 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 17:32:03.4509 Info Adding target File Target[allfile]
+2018-04-18 17:32:03.4509 Info Adding target File Target[ownFile-web]
+2018-04-18 17:32:03.4703 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 17:32:03.4937 Info Found 45 configuration items
+2018-04-18 18:50:31.2886 Info Message Template Auto Format enabled
+2018-04-18 18:50:31.3237 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 18:50:31.4016 Info Adding target File Target[allfile]
+2018-04-18 18:50:31.4016 Info Adding target File Target[ownFile-web]
+2018-04-18 18:50:31.4016 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 18:50:31.4351 Info Found 45 configuration items
+2018-04-18 18:51:07.7552 Info Message Template Auto Format enabled
+2018-04-18 18:51:07.7686 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 18:51:07.8299 Info Adding target File Target[allfile]
+2018-04-18 18:51:07.8299 Info Adding target File Target[ownFile-web]
+2018-04-18 18:51:07.8412 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 18:51:07.8593 Info Found 45 configuration items
+2018-04-18 21:56:36.3102 Info Message Template Auto Format enabled
+2018-04-18 21:56:36.3584 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 21:56:36.4193 Info Adding target File Target[allfile]
+2018-04-18 21:56:36.4243 Info Adding target File Target[ownFile-web]
+2018-04-18 21:56:36.4243 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 21:56:36.4510 Info Found 45 configuration items
+2018-04-18 22:01:52.5443 Info Message Template Auto Format enabled
+2018-04-18 22:01:52.5836 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 22:01:52.6415 Info Adding target File Target[allfile]
+2018-04-18 22:01:52.6415 Info Adding target File Target[ownFile-web]
+2018-04-18 22:01:52.6415 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 22:01:52.6662 Info Found 45 configuration items
+2018-04-18 22:02:50.7209 Info Message Template Auto Format enabled
+2018-04-18 22:02:50.7352 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 22:02:50.7974 Info Adding target File Target[allfile]
+2018-04-18 22:02:50.8030 Info Adding target File Target[ownFile-web]
+2018-04-18 22:02:50.8030 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 22:02:50.8275 Info Found 45 configuration items
+2018-04-18 22:54:12.5467 Info Message Template Auto Format enabled
+2018-04-18 22:54:12.5682 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 22:54:12.6310 Info Adding target File Target[allfile]
+2018-04-18 22:54:12.6310 Info Adding target File Target[ownFile-web]
+2018-04-18 22:54:12.6448 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 22:54:12.6624 Info Found 45 configuration items
+2018-04-18 22:54:31.6184 Info Message Template Auto Format enabled
+2018-04-18 22:54:31.6355 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 22:54:31.7152 Info Adding target File Target[allfile]
+2018-04-18 22:54:31.7210 Info Adding target File Target[ownFile-web]
+2018-04-18 22:54:31.7210 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 22:54:31.7480 Info Found 45 configuration items
+2018-04-18 22:57:30.1676 Info Message Template Auto Format enabled
+2018-04-18 22:57:30.1823 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 22:57:30.2462 Info Adding target File Target[allfile]
+2018-04-18 22:57:30.2511 Info Adding target File Target[ownFile-web]
+2018-04-18 22:57:30.2511 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 22:57:30.2784 Info Found 45 configuration items
+2018-04-18 22:57:49.8378 Info Message Template Auto Format enabled
+2018-04-18 22:57:49.8533 Info Loading assembly: NLog.Web.AspNetCore
+2018-04-18 22:57:49.9242 Info Adding target File Target[allfile]
+2018-04-18 22:57:49.9242 Info Adding target File Target[ownFile-web]
+2018-04-18 22:57:49.9242 Info Configured from an XML element in D:\Development\csharp\SearchUser\SearchUser.Api\bin\Debug\netcoreapp2.0\nlog.config...
+2018-04-18 22:57:49.9508 Info Found 45 configuration items

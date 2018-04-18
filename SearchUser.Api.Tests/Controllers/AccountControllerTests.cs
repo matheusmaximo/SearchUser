@@ -1,18 +1,26 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 using SearchUser.Api.Controllers;
 using SearchUser.Api.Manager;
+using SearchUser.Api.Mapping;
 using SearchUser.Api.Persistence;
 using SearchUser.Entities.Models;
 using SearchUser.Entities.ViewModel;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -20,119 +28,167 @@ namespace SearchUser.Api.Tests.Controllers
 {
     public class AccountControllerTests
     {
-        [Fact]
-        public async Task TestSignIn()
+        public SearchUserDbContext Context { get; }
+        public ServiceProvider ServiceProvider { get; }
+        public IConfiguration Configuration { get; }
+        public IMapper Mapper { get; }
+
+        // Test data
+        private static readonly string testUserId = "79bfe381-050d-4cd4-9cd7-64b3a68d8faf";
+        private static readonly string testUserName = "Matheus";
+        private static readonly string testUserEmail = "matheusmaximo@gmail.com";
+        private static readonly string testUserPassword = "Passw0rd!";
+
+        [Theory]
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", "matheusmaximo@gmail.com", "Passw0rd!", StatusCodes.Status202Accepted)] // All correct
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", "matheusmaximoERROR@gmail.com", "Passw0rd!", StatusCodes.Status404NotFound)] // Email wrong
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", "", "Passw0rd!", StatusCodes.Status404NotFound)] // Email empty
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", null, "Passw0rd!", StatusCodes.Status404NotFound)] // Email null
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", "matheusmaximo@gmail.com", "Passw0rd", StatusCodes.Status401Unauthorized)] // Password wrong
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", "matheusmaximo@gmail.com", "", StatusCodes.Status401Unauthorized)] // Password empty
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", "matheusmaximo@gmail.com", null, StatusCodes.Status401Unauthorized)] // Password null
+        public async Task TestSignIn(string userId = null, string userEmail = null, string userPassword = null, int statusCodeExpected = StatusCodes.Status200OK)
         {
-            IMapper mapper = null;
-            ILogger<AccountController> logger = null;
-            var signInManager = GetMockSignInManager();
-
-            // Arrange
-            var controller = new AccountController(mapper, signInManager.Object, logger);
-
-            // Act
-            var loginDto = new LoginViewModel { Email = "matheusmaximo@gmail.com", Password = "Passw0rd!" };
-            IActionResult actionResult = await controller.Signin(loginDto);
-
-            // Assert
-            Assert.NotNull(actionResult);
-            CreatedResult result = actionResult as CreatedResult;
-
-            Assert.NotNull(result);
-            Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
-
-            Assert.NotNull(result.Value);
-            Assert.IsType<SignedInUserViewModel>(result.Value);
-
-            SignedInUserViewModel userViewModel = result.Value as SignedInUserViewModel;
-            Assert.NotNull(userViewModel.Token);
-        }
-
-        [Fact]
-        public async Task TestSignUp()
-        {
-            IMapper mapper = null;
-            var signInManager = GetMockSignInManager();
-            ILogger<AccountController> logger = null;
-
-            // Arrange
-            var controller = new AccountController(mapper, signInManager.Object, logger);
-
-            // Act
-            var signupDto = new UserViewModel
-            {
-                Name = "Matheus",
-                Email = "matheusmaximo@gmail.com",
-                Password = "Passw0rd!",
-                Telephones = new Collection<TelephoneViewModel>
-                {
-                    new TelephoneViewModel{ Number = "+5585988861982"},
-                    new TelephoneViewModel{ Number = "+353834209690"},
-                }
+            var httpContext = new DefaultHttpContext();
+            var claims = new List<Claim> {
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.Ticks.ToString(), ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Sub, userEmail ?? testUserEmail),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, userId)
             };
-            IActionResult actionResult = await controller.Signup(signupDto);
+            httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            httpContext.RequestServices = this.ServiceProvider;
 
-            // Assert
-            Assert.NotNull(actionResult);
-            CreatedResult result = actionResult as CreatedResult;
-
-            Assert.NotNull(result);
-            Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
-
-            Assert.NotNull(result.Value);
-            Assert.IsType<SignedInUserViewModel>(result.Value);
-
-            SignedInUserViewModel userViewModel = result.Value as SignedInUserViewModel;
-            Assert.NotNull(userViewModel.Id);
-            Assert.NotNull(userViewModel.Token);
-        }
-
-        [Fact]
-        public void TestFindUser()
-        {
-            IMapper mapper = null;
-            var signInManager = GetMockSignInManager();
-            ILogger<AccountController> logger = null;
-
-            // Arrange
-            var controller = new AccountController(mapper, signInManager.Object, logger);
+            var logger = this.ServiceProvider.GetRequiredService<ILogger<AccountController>>();
+            var applicationSignInManager = this.ServiceProvider.GetRequiredService<ApplicationSignInManager>();
+            applicationSignInManager.Context = httpContext;
+            var controller = new AccountController(this.Mapper, applicationSignInManager, logger);
+            controller.ControllerContext.HttpContext = httpContext;
 
             // Act
-            var id = "";
-            IActionResult actionResult = controller.FindUser(id);
+            var loginDto = new LoginViewModel { Email = userEmail, Password = userPassword };
+            ObjectResult result = await controller.Signin(loginDto);
 
             // Assert
-            Assert.NotNull(actionResult);
-            CreatedResult result = actionResult as CreatedResult;
-
             Assert.NotNull(result);
-            Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
+            Assert.Equal(statusCodeExpected, result.StatusCode);
 
-            Assert.NotNull(result.Value);
-            Assert.IsType<SignedInUserViewModel>(result.Value);
+            if (statusCodeExpected == StatusCodes.Status202Accepted)
+            {
+                Assert.NotNull(result.Value);
+                Assert.IsType<SignedInUserViewModel>(result.Value);
 
-            SignedInUserViewModel userViewModel = result.Value as SignedInUserViewModel;
-            Assert.NotNull(userViewModel.Token);
+                SignedInUserViewModel userViewModel = result.Value as SignedInUserViewModel;
+                Assert.NotNull(userViewModel.Id);
+                Assert.NotNull(userViewModel.Token);
+            }
+        }
+
+        [Theory]
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", StatusCodes.Status202Accepted)] // All correct
+        public void TestFindUser(string userId = null, int statusCodeExpected = StatusCodes.Status200OK)
+        {
+            var httpContext = new DefaultHttpContext();
+            var claims = new List<Claim> {
+                new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.Ticks.ToString(), ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Sub, testUserEmail),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, userId)
+            };
+            httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            httpContext.RequestServices = this.ServiceProvider;
+
+            var logger = this.ServiceProvider.GetRequiredService<ILogger<AccountController>>();
+            var applicationSignInManager = this.ServiceProvider.GetRequiredService<ApplicationSignInManager>();
+            applicationSignInManager.Context = httpContext;
+
+            var controller = new AccountController(this.Mapper, applicationSignInManager, logger);
+            controller.ControllerContext.HttpContext = httpContext;
+
+            // Act
+            IActionResult actionResult = controller.FindUser(userId);
+
+            Assert.NotNull(actionResult);
+            Assert.IsType<ObjectResult>(actionResult);
+
+            var result = actionResult as ObjectResult;
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(statusCodeExpected, result.StatusCode);
+
+            if (statusCodeExpected == StatusCodes.Status202Accepted)
+            {
+                Assert.NotNull(result.Value);
+                Assert.IsType<SignedInUserViewModel>(result.Value);
+
+                SignedInUserViewModel userViewModel = result.Value as SignedInUserViewModel;
+                Assert.NotNull(userViewModel.Id);
+                Assert.NotNull(userViewModel.Token);
+            }
         }
 
         #region Private methods
         /// <summary>
-        /// Creates a mock SignInManager class
+        /// Create a user for tests
         /// </summary>
-        /// <returns>Mocked SignInManager object</returns>
-        private Mock<ApplicationSignInManager> GetMockSignInManager()
+        private async void CreateTestUser()
         {
-            var mockUsrMgr = GetMockUserManager();
-            return new Mock<ApplicationSignInManager>(mockUsrMgr.Object);
+            // Arrange
+            var telephones = new Collection<Telephone>
+            {
+                new Telephone { Number = "+353834209690" },
+                new Telephone { Number = "+353834211002" },
+                new Telephone { Number = "+5585988861982" }
+            };
+            var user = new ApplicationUser { Id = testUserId, Name = testUserName, UserName = testUserEmail, Email = testUserEmail, Telephones = telephones };
+            var userManager = this.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var userManagerResult = await userManager.CreateAsync(user, testUserPassword);
+            Assert.True(userManagerResult.Succeeded);
         }
+        #endregion
 
-        /// <summary>
-        /// Creates a mock for UserManager
-        /// </summary>
-        /// <returns>Mocked UserManager object</returns>
-        private Mock<UserManager<ApplicationUser>> GetMockUserManager()
+        #region Constructor
+        public AccountControllerTests()
         {
-            return new Mock<UserManager<ApplicationUser>>();
+            var services = new ServiceCollection();
+
+            // Configuration
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(new Dictionary<string, string>
+            {
+                { "Jwt:Key", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjYzNjU5NjU5OTM1NDA1MDM2Niwic3ViIjoibWF0aGV1c21heGltb0BnbWFpbC5jb20iLCJqdGkiOiI2ZWNmNzg2Yy05NjliLTQzMmEtODViYi04NzE5OTcxZDY5YTQiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6Ijc5YmZlMzgxLTA1MGQtNGNkNC05Y2Q3LTY0YjNhNjhkOGZhZiIsImV4cCI6MTUyNDA2MTMzNSwiaXNzIjoiaHR0cHM6Ly9naXRodWIuY29tL21hdGhldXNtYXhpbW8iLCJhdWQiOiJodHRwczovL2dpdGh1Yi5jb20vbWF0aGV1c21heGltbyJ9.T_ZB-ECHKyhR77PjT7-Uioh6EsKX_apVsRjV51nnADg" },
+                { "Jwt:ExpireMinutes", "1" },
+                { "Jwt:Issuer", "http://githubtest.com/matheusmaximo" }
+            });
+            services.AddSingleton<IConfiguration>(configurationBuilder.Build());
+
+            // DbContext
+            services.AddDbContext<SearchUserDbContext>(options => options.UseInMemoryDatabase("SearchUserTest"));
+
+            // Identity
+            services.AddMvc();
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<SearchUserDbContext>()
+                .AddSignInManager<ApplicationSignInManager>()
+                .AddDefaultTokenProviders();
+            services.Configure<IdentityOptions>(options => { options.User.RequireUniqueEmail = true; });
+
+            // Jwt
+            services.AddApplicationSecurity(this.Configuration);
+
+            // Create HttpContext
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+            // Load properties
+            this.ServiceProvider = services.BuildServiceProvider();
+            this.Configuration = this.ServiceProvider.GetRequiredService<IConfiguration>();
+            this.Context = this.ServiceProvider.GetRequiredService<SearchUserDbContext>();
+
+            var config = new MapperConfiguration(cfg => { cfg.AddProfile(new MappingProfile()); });
+            this.Mapper = config.CreateMapper();
+
+            CreateTestUser();
         }
         #endregion
     }
