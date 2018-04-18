@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SearchUser.Api.Initializer;
-using SearchUser.Api.Persistence;
 using System;
 using System.Threading.Tasks;
 

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using System;
 using SearchUser.Entities.Models;
 using System.Collections.ObjectModel;
-using SearchUser.Api.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;

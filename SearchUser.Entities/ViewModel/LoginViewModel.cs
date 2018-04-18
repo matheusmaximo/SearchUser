@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SearchUser.Entities.ViewModel
+﻿namespace SearchUser.Entities.ViewModel
 {
     /// <summary>
     /// Model to be used to login
