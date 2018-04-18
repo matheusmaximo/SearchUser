@@ -24,10 +24,11 @@ namespace SearchUser.Api.Tests.Controllers
         public async Task TestSignIn()
         {
             IMapper mapper = null;
+            ILogger<AccountController> logger = null;
             var signInManager = GetMockSignInManager();
 
             // Arrange
-            var controller = new AccountController(mapper, signInManager.Object);
+            var controller = new AccountController(mapper, signInManager.Object, logger);
 
             // Act
             var loginDto = new LoginViewModel { Email = "matheusmaximo@gmail.com", Password = "Passw0rd!" };
@@ -52,9 +53,10 @@ namespace SearchUser.Api.Tests.Controllers
         {
             IMapper mapper = null;
             var signInManager = GetMockSignInManager();
+            ILogger<AccountController> logger = null;
 
             // Arrange
-            var controller = new AccountController(mapper, signInManager.Object);
+            var controller = new AccountController(mapper, signInManager.Object, logger);
 
             // Act
             var signupDto = new UserViewModel
@@ -90,9 +92,10 @@ namespace SearchUser.Api.Tests.Controllers
         {
             IMapper mapper = null;
             var signInManager = GetMockSignInManager();
+            ILogger<AccountController> logger = null;
 
             // Arrange
-            var controller = new AccountController(mapper, signInManager.Object);
+            var controller = new AccountController(mapper, signInManager.Object, logger);
 
             // Act
             var id = "";
