@@ -7,8 +7,6 @@ namespace SearchUser.Entities.ViewModel
 {
     public class UserViewModel
     {
-        public string Id { get; set; }
-
         public string Name { get; set; }
 
         public string Email { get; set; }
@@ -16,14 +14,6 @@ namespace SearchUser.Entities.ViewModel
         public string Password { get; set; }
 
         public ICollection<TelephoneViewModel> Telephones { get; set; }
-
-        public DateTime? CreatedOn { get; set; }
-
-        public DateTime? LastUpdatedOn { get; set; }
-
-        public DateTime? LastLoginOn { get; set; }
-
-        public string Token { get; set; }
 
         public UserViewModel()
         {

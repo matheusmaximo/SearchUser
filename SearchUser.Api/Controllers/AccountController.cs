@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 using SearchUser.Api.Manager;
-using SearchUser.Api.Persistence;
 using SearchUser.Entities.Models;
 using SearchUser.Entities.ViewModel;
 
@@ -30,7 +21,11 @@ namespace SearchUser.Api.Controllers
         private readonly ILogger<AccountController> logger;
 
         #region Public methods
-        // GET api/finduser/id
+        /// <summary>
+        /// Execute find user
+        /// </summary>
+        /// <param name="id">User id to find. Must match with signed in user</param>
+        /// <returns>Returns [<see cref="IActionResult"/>] with httpStatusCode response and if success a [<see cref="SignedInUserViewModel"/>] json object</returns>
         [Authorize]
         [HttpGet("{id}")]
         public IActionResult FindUser(string id)
@@ -54,7 +49,11 @@ namespace SearchUser.Api.Controllers
             return new ObjectResult(mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
         }
 
-        // POST api/signin
+        /// <summary>
+        /// Execute signin
+        /// </summary>
+        /// <param name="loginDto">[<see cref="LoginViewModel"/>]</param>
+        /// <returns>Returns [<see cref="ObjectResult"/>] with httpStatusCode response and if success a [<see cref="SignedInUserViewModel"/>] json object</returns>
         [HttpPost]
         public async Task<ObjectResult> Signin([FromBody]LoginViewModel loginDto)
         {
@@ -80,7 +79,11 @@ namespace SearchUser.Api.Controllers
             return new ObjectResult(mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
         }
 
-        // POST api/signup
+        /// <summary>
+        /// Execute signup
+        /// </summary>
+        /// <param name="loginDto">[<see cref="UserViewModel"/>]</param>
+        /// <returns>Returns [<see cref="ObjectResult"/>] with httpStatusCode response and if success a [<see cref="SignedInUserViewModel"/>] json object</returns>
         [HttpPost]
         public async Task<ObjectResult> Signup([FromBody]UserViewModel userDto)
         {
@@ -108,6 +111,12 @@ namespace SearchUser.Api.Controllers
         #endregion
 
         #region Constructor
+        /// <summary>
+        /// Default constructor
+        /// </summary>
+        /// <param name="mapper">[<see cref="IMapper"/>]</param>
+        /// <param name="signInManager">[<see cref="ApplicationSignInManager"/>]</param>
+        /// <param name="logger">[<see cref="ILogger"/>]</param>
         public AccountController(IMapper mapper, ApplicationSignInManager signInManager, ILogger<AccountController> logger)
         {
             this.mapper = mapper;
