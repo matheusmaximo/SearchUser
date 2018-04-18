@@ -73,9 +73,9 @@ Execute signin on application.
 
 ### /api/finduser
 Search user on database
-* Requires authentication. Baerer token given on signup OR signin
+* Requires authentication Bearer. Token given on /api/signup OR /api/signin
 * Request method: GET
-* Url parameter: USERID (I.E. api/finduser/79bfe381-050d-4cd4-9cd7-64b3a68d8faf )
+* Url parameter: USERID (I.E. /api/finduser/79bfe381-050d-4cd4-9cd7-64b3a68d8faf )
 * Body: no needs body
 * Response: json object with user data
 ```json
@@ -89,7 +89,7 @@ Search user on database
 ```
 
 ### /documentation
-Project documentation. Swagger.
+Project documentation. Swagger like.
 * No authentication required.
 * Request method: GET
 * Response: HTML
