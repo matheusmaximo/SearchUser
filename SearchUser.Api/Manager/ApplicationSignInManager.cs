@@ -50,7 +50,7 @@ namespace SearchUser.Api.Manager
         /// <returns>True when sesion was created less than {configuration:Jwt:ExpireMinutes} ago</returns>
         public bool SessionIsValid(ApplicationUser user)
         {
-            return (user.LastLoginOn.HasValue || (user.LastLoginOn.Value.AddMinutes(Convert.ToDouble(configuration["Jwt:ExpireMinutes"])).Ticks < DateTime.Now.Ticks));
+            return (user.LastLoginOn.HasValue && (user.LastLoginOn.Value.AddMinutes(Convert.ToDouble(configuration["Jwt:ExpireMinutes"])).Ticks > DateTime.Now.Ticks));
         }
 
         /// <summary>

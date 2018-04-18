@@ -27,14 +27,15 @@ namespace SearchUser.Api.Controllers
     {
         private readonly IMapper mapper;
         private readonly ApplicationSignInManager signInManager;
+        private readonly ILogger<AccountController> logger;
 
         #region Public methods
         // GET api/finduser/id
         [Authorize]
-        [HttpGet("{id}", Name = "GetUser")]
+        [HttpGet("{id}")]
         public IActionResult FindUser(string id)
         {
-            signInManager.Logger.LogDebug("GetUser.id = " + id);
+            logger.LogDebug("GetUser.id = " + id);
 
             // Compare user id with given token user id
             if (id != signInManager.GetCurrentUser()) { return StatusCode(StatusCodes.Status401Unauthorized, new { Message = "Unauthorized" }); }
@@ -57,7 +58,7 @@ namespace SearchUser.Api.Controllers
         [HttpPost]
         public async Task<ObjectResult> Signin([FromBody]LoginViewModel loginDto)
         {
-            signInManager.Logger.LogDebug("SigninUser.email = " + loginDto.Email);
+            logger.LogDebug("SigninUser.email = " + loginDto.Email);
 
             // Try to find user with the given email
             var user = signInManager.UserManager.Users.SingleOrDefault(r => r.Email == loginDto.Email);
@@ -83,11 +84,12 @@ namespace SearchUser.Api.Controllers
         [HttpPost]
         public async Task<ObjectResult> Signup([FromBody]UserViewModel userDto)
         {
+            logger.LogDebug("SignupUser.email = " + userDto.Email);
+
             // Map from dto to entity
             var user = mapper.Map<UserViewModel, ApplicationUser>(userDto);
 
             // Try to create new user
-            signInManager.Logger.LogDebug("SignupUser.email = " + user.Email);
             var result = await signInManager.UserManager.CreateAsync(user, userDto.Password);
 
             // Check if suceed
@@ -106,10 +108,11 @@ namespace SearchUser.Api.Controllers
         #endregion
 
         #region Constructor
-        public AccountController(IMapper mapper, ApplicationSignInManager signInManager)
+        public AccountController(IMapper mapper, ApplicationSignInManager signInManager, ILogger<AccountController> logger)
         {
             this.mapper = mapper;
             this.signInManager = signInManager;
+            this.logger = logger;
         }
         #endregion
     }
