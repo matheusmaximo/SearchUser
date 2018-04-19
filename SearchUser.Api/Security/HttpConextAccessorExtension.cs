@@ -3,16 +3,16 @@ using System.Security.Claims;
 
 namespace SearchUser.Api
 {
-    public static class IHttpContextAccessorExtension
+    public static class IHttpContextExtension
     {
         /// <summary>
         /// Http Context extension to get user Id
         /// </summary>
-        /// <param name="httpContextAccessor">Http context</param>
+        /// <param name="httpContext">Http context</param>
         /// <returns>Logged in user Id</returns>
-        public static string CurrentUser(this IHttpContextAccessor httpContextAccessor)
+        public static string CurrentUser(this HttpContext httpContext)
         {
-            return httpContextAccessor?.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return httpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 }

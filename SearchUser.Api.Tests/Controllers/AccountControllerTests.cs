@@ -85,7 +85,8 @@ namespace SearchUser.Api.Tests.Controllers
         }
 
         [Theory]
-        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", StatusCodes.Status202Accepted)] // All correct
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", StatusCodes.Status200OK)] // All correct
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8fa", StatusCodes.Status404NotFound)] // Wrong id
         public void TestFindUser(string userId = null, int statusCodeExpected = StatusCodes.Status200OK)
         {
             var httpContext = new DefaultHttpContext();
@@ -109,22 +110,28 @@ namespace SearchUser.Api.Tests.Controllers
             IActionResult actionResult = controller.FindUser(userId);
 
             Assert.NotNull(actionResult);
-            Assert.IsType<ObjectResult>(actionResult);
-
-            var result = actionResult as ObjectResult;
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(statusCodeExpected, result.StatusCode);
-
-            if (statusCodeExpected == StatusCodes.Status202Accepted)
+            if (statusCodeExpected == StatusCodes.Status200OK)
             {
-                Assert.NotNull(result.Value);
-                Assert.IsType<SignedInUserViewModel>(result.Value);
+                Assert.IsType<ObjectResult>(actionResult);
+                var objectResult = actionResult as ObjectResult;
 
-                SignedInUserViewModel userViewModel = result.Value as SignedInUserViewModel;
+                // Assert
+                Assert.NotNull(objectResult);
+                Assert.Equal(statusCodeExpected, objectResult.StatusCode);
+
+                Assert.NotNull(objectResult.Value);
+                Assert.IsType<SignedInUserViewModel>(objectResult.Value);
+
+                SignedInUserViewModel userViewModel = objectResult.Value as SignedInUserViewModel;
                 Assert.NotNull(userViewModel.Id);
-                Assert.NotNull(userViewModel.Token);
+            }
+            else
+            {
+                Assert.IsType<StatusCodeResult>(actionResult);
+                var statusResult = actionResult as StatusCodeResult;
+
+                Assert.NotNull(statusResult);
+                Assert.Equal(statusCodeExpected, statusResult.StatusCode);
             }
         }
 
@@ -141,7 +148,7 @@ namespace SearchUser.Api.Tests.Controllers
                 new Telephone { Number = "+353834211002" },
                 new Telephone { Number = "+5585988861982" }
             };
-            var user = new ApplicationUser { Id = testUserId, Name = testUserName, UserName = testUserEmail, Email = testUserEmail, Telephones = telephones };
+            var user = new ApplicationUser { Id = testUserId, Name = testUserName, UserName = testUserEmail, Email = testUserEmail, Telephones = telephones, LastLoginOn = DateTime.Now };
             var userManager = this.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var userManagerResult = await userManager.CreateAsync(user, testUserPassword);
             Assert.True(userManagerResult.Succeeded);

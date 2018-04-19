@@ -30,7 +30,7 @@ namespace SearchUser.Api.Manager
         /// <returns>Logged in user Id</returns>
         public string GetCurrentUser()
         {
-            return contextAccessor.CurrentUser();
+            return this.Context.CurrentUser();
         }
 
         /// <summary>

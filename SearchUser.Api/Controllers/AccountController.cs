@@ -37,7 +37,7 @@ namespace SearchUser.Api.Controllers
 
             // Try to find user by id
             var user = signInManager.UserManager.Users.Include(m => m.Telephones).FirstOrDefault(_user => _user.Id.Equals(id));
-            if (user == null) { return NotFound(); }
+            if (user == null) { return StatusCode(StatusCodes.Status404NotFound); }
 
             // Verify last login time
             if(!signInManager.SessionIsValid(user))
@@ -61,7 +61,7 @@ namespace SearchUser.Api.Controllers
 
             // Try to find user with the given email
             var user = signInManager.UserManager.Users.SingleOrDefault(r => r.Email == loginDto.Email);
-            if (user == null) { return NotFound(new { Message = "Invalid user and / or password" }); }
+            if (user == null) { return StatusCode(StatusCodes.Status404NotFound, new { Message = "Invalid user and / or password" }); }
             
             // Check given password
             var result = await signInManager.PasswordSignInAsync(user.Email ?? string.Empty, loginDto.Password ?? string.Empty, false, false);
