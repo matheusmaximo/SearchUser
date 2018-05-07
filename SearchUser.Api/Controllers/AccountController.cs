@@ -37,7 +37,7 @@ namespace SearchUser.Api.Controllers
 
             // Try to find user by id
             var user = signInManager.UserManager.Users.Include(m => m.Telephones).FirstOrDefault(_user => _user.Id.Equals(id));
-            if (user == null) { return StatusCode(StatusCodes.Status404NotFound); }
+            if (user == null) { return StatusCode(StatusCodes.Status404NotFound, null); }
 
             // Verify last login time
             if(!signInManager.SessionIsValid(user))
@@ -106,7 +106,8 @@ namespace SearchUser.Api.Controllers
             await signInManager.SignInAsync(user, false);
 
             // Return mapped object
-            return StatusCode(StatusCodes.Status201Created, mapper.Map<ApplicationUser, SignedInUserViewModel>(user));
+            var signedInUserDto = mapper.Map<ApplicationUser, SignedInUserViewModel>(user);
+            return StatusCode(StatusCodes.Status201Created, signedInUserDto);
         }
         #endregion
 

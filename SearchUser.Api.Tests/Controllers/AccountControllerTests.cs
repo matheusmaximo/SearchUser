@@ -85,16 +85,17 @@ namespace SearchUser.Api.Tests.Controllers
         }
 
         [Theory]
-        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", StatusCodes.Status200OK)] // All correct
-        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8fa", StatusCodes.Status404NotFound)] // Wrong id
-        public void TestFindUser(string userId = null, int statusCodeExpected = StatusCodes.Status200OK)
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8faf", "79bfe381-050d-4cd4-9cd7-64b3a68d8faf", StatusCodes.Status200OK)] // All correct
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8fa", "79bfe381-050d-4cd4-9cd7-64b3a68d8faf", StatusCodes.Status401Unauthorized)] // Different id
+        [InlineData("79bfe381-050d-4cd4-9cd7-64b3a68d8fa", "79bfe381-050d-4cd4-9cd7-64b3a68d8fa", StatusCodes.Status404NotFound)] // Wrong id
+        public void TestFindUser(string userId = null, string jwtUserId = null, int statusCodeExpected = StatusCodes.Status200OK)
         {
             var httpContext = new DefaultHttpContext();
             var claims = new List<Claim> {
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.Now.Ticks.ToString(), ClaimValueTypes.Integer64),
                 new Claim(JwtRegisteredClaimNames.Sub, testUserEmail),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, userId)
+                new Claim(ClaimTypes.NameIdentifier, jwtUserId)
             };
             httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims));
             httpContext.RequestServices = this.ServiceProvider;
@@ -110,29 +111,45 @@ namespace SearchUser.Api.Tests.Controllers
             IActionResult actionResult = controller.FindUser(userId);
 
             Assert.NotNull(actionResult);
-            if (statusCodeExpected == StatusCodes.Status200OK)
+            Assert.IsType<ObjectResult>(actionResult);
+
+            var objectResult = actionResult as ObjectResult;
+            Assert.Equal(statusCodeExpected, objectResult.StatusCode);
+
+            switch (statusCodeExpected)
             {
-                Assert.IsType<ObjectResult>(actionResult);
-                var objectResult = actionResult as ObjectResult;
+                case StatusCodes.Status200OK:
+                    Assert.NotNull(objectResult.Value);
+                    Assert.IsType<SignedInUserViewModel>(objectResult.Value);
 
-                // Assert
-                Assert.NotNull(objectResult);
-                Assert.Equal(statusCodeExpected, objectResult.StatusCode);
+                    SignedInUserViewModel userViewModel = objectResult.Value as SignedInUserViewModel;
+                    Assert.NotNull(userViewModel.Id);
+                    Assert.Equal(userId, userViewModel.Id);
+                    break;
+                case StatusCodes.Status401Unauthorized:
+                    Assert.NotNull(objectResult.Value);
 
-                Assert.NotNull(objectResult.Value);
-                Assert.IsType<SignedInUserViewModel>(objectResult.Value);
-
-                SignedInUserViewModel userViewModel = objectResult.Value as SignedInUserViewModel;
-                Assert.NotNull(userViewModel.Id);
+                    dynamic value401 = objectResult.Value;
+                    var message = value401?.GetType().GetProperty("Message")?.GetValue(value401, null);
+                    Assert.Equal("Unauthorized", message);
+                    break;
+                case StatusCodes.Status404NotFound:
+                    Assert.Null(objectResult.Value);
+                    break;
             }
-            else
-            {
-                Assert.IsType<StatusCodeResult>(actionResult);
-                var statusResult = actionResult as StatusCodeResult;
+        }
 
-                Assert.NotNull(statusResult);
-                Assert.Equal(statusCodeExpected, statusResult.StatusCode);
-            }
+        [Fact]
+        public async Task TestSignUp()
+        {
+            var logger = this.ServiceProvider.GetRequiredService<ILogger<AccountController>>();
+            var applicationSignInManager = this.ServiceProvider.GetRequiredService<ApplicationSignInManager>();
+            var controller = new AccountController(this.Mapper, applicationSignInManager, logger);
+
+            var userDto = new UserViewModel { Name = "Test", Email = "Test", Password = "Test", Telephones = {
+                    new TelephoneViewModel{ Number = "123456789" }
+                } };
+            ObjectResult result = await controller.Signup(userDto);
         }
 
         #region Private methods
